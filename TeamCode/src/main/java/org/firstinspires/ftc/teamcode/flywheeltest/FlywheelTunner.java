@@ -11,7 +11,7 @@ public class FlywheelTunner extends OpMode {
 
     public DcMotorEx flywheelMotor;
 
-    public double highVelocity = 1350;
+    public double highVelocity = 1300;
     public double lowVelocity = 900;
 
     double curTargetVelocity = highVelocity;
@@ -19,7 +19,7 @@ public class FlywheelTunner extends OpMode {
     double F = 0;
     double P = 0;
 
-    double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
+    double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
 
     int stepIndex = 1;
 
@@ -47,6 +47,10 @@ public class FlywheelTunner extends OpMode {
             stepIndex = (stepIndex + 1) % stepSizes.length;
         }
 
+        if (gamepad1.aWasPressed()){
+            stepIndex = (stepIndex - 1) % stepSizes.length;
+        }
+
         if (gamepad1.dpadLeftWasPressed()){
             F -= stepSizes[stepIndex];
         }
@@ -64,6 +68,16 @@ public class FlywheelTunner extends OpMode {
             P -= stepSizes[stepIndex];
         }
 
+        if (gamepad1.rightBumperWasPressed()){
+            highVelocity += stepSizes[stepIndex];
+            lowVelocity += stepSizes[stepIndex];
+        }
+
+        if (gamepad1.leftBumperWasPressed()){
+            highVelocity -= stepSizes[stepIndex];
+            lowVelocity -= stepSizes[stepIndex];
+        }
+
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
@@ -79,6 +93,6 @@ public class FlywheelTunner extends OpMode {
         telemetry.addLine("~~~~~~~~~~~~~~~~~~~~~~~~");
         telemetry.addData("Tuning P", ".%4f (D-Pad U/D)", P);
         telemetry.addData("Tuning F", ".%4f (D-Pad L/R)", F);
-        telemetry.addData("Step Size", ".%4f (B Button)", stepSizes[stepIndex]);
+        telemetry.addData("Step Size", ".%4f (B/A )", stepSizes[stepIndex]);
     }
 }
