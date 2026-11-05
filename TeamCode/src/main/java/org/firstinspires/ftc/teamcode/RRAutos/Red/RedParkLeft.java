@@ -8,6 +8,8 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.Launcher;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Autonomous (name = "RoadRunner Starter Bot Auto")
@@ -19,6 +21,9 @@ public class RedParkLeft extends LinearOpMode {
         Pose2d beginPose = new Pose2d(61, -12, 0);
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
+        
+        Launcher shoot = new Launcher(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
         waitForStart();
 

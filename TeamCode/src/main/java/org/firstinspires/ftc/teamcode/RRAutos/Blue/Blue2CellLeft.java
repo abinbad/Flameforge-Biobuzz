@@ -8,6 +8,8 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.Launcher;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Autonomous (name = "RoadRunner Starter Bot Auto")
@@ -19,22 +21,25 @@ public class Blue2CellLeft extends LinearOpMode {
         Pose2d beginPose = new Pose2d(-61, 12, 180);
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
+        
+        Launcher shoot = new Launcher(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                //shoot
+                .stopAndAdd(shoot.close_fire())
                  .lineToX(-42)
                  .turnTo(Math.toRadians(0))
                  .splineTo(new Vector2d(-36, 51), Math.toRadians(90))
-                 //start intaking
+                 .stopAndAdd(intake.startIntake())
                  .splineTo(new Vector2d(-59.5, 61), Math.toRadians(180))
                  .setReversed(true).splineTo(new Vector2d(-24, 55), Math.toRadians(0))
-                 //stop intaking
+                .stopAndAdd(intake.stopIntake())
                  .setReversed(true).splineTo(new Vector2d(36, 11), Math.toRadians(270))
                  .turn(Math.toRadians(-90))
                  .lineToX(61)
-                 //shoot
+                 .stopAndAdd(shoot.close_fire())
                  .setReversed(true).splineTo(new Vector2d(48, 59), Math.toRadians(90))
                  //end here maybe if thats nessicary
                 .build();

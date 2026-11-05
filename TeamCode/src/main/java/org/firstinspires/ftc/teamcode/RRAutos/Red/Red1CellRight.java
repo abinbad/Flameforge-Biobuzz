@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.Launcher;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Autonomous (name = "RoadRunner Starter Bot Auto")
@@ -20,23 +22,27 @@ public class Red1CellRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+
         Pose2d beginPose = new Pose2d(61, -12, 0);
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
+        
+        Launcher shoot = new Launcher(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                //shoot
+                .stopAndAdd(shoot.close_fire())
                 .lineToX(42)
                 .turnTo(Math.toRadians(180))
                 .splineTo(new Vector2d(36, -51), Math.toRadians(270))
-                //start intaking
+                .stopAndAdd(intake.startIntake())
                 .splineTo(new Vector2d(59.5, -61), Math.toRadians(0))
                 .setReversed(true).splineTo(new Vector2d(36, -51), Math.toRadians(180))
-                //stop intaking
+                .stopAndAdd(intake.stopIntake())
                 .setReversed(false).splineTo(new Vector2d(61,-12), Math.toRadians(0))
-                //shoot
+                .stopAndAdd(shoot.close_fire())
                 .setReversed(true).splineTo(new Vector2d(24, -40), Math.toRadians(180))
                 .setReversed(true).splineTo(new Vector2d(-24, -59), Math.toRadians(270))
                 //end here maybe if thats nessicary
@@ -45,4 +51,5 @@ public class Red1CellRight extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(path));
 
     }
+
 }

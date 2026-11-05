@@ -24,6 +24,9 @@ public final class SplineTest extends LinearOpMode {
                             .build());
         } else if (TuningOpModes.DRIVE_CLASS.equals(TankDrive.class)) {
             TankDrive drive = new TankDrive(hardwareMap, beginPose);
+        
+        Launcher shoot = new Launcher(hardwareMap);
+        Intake intake = new Intake(hardwareMap);
 
             waitForStart();
 

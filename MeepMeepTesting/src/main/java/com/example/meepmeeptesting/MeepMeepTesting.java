@@ -24,16 +24,16 @@ public class MeepMeepTesting {
 
 
          myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(61, -12, Math.toRadians(0)))
-                 //shoot
+                 .stopAndAdd(shoot.close_fire())
                 .lineToX(42)
                 .turnTo(Math.toRadians(180))
                 .splineTo(new Vector2d(36, -51), Math.toRadians(270))
-                //start intaking
+                .stopAndAdd(intake.startIntake())
                 .splineTo(new Vector2d(59.5, -61), Math.toRadians(0))
                 .setReversed(true).splineTo(new Vector2d(36, -51), Math.toRadians(180))
-                //stop intaking
+               .stopAndAdd(intake.stopIntake())
                 .setReversed(false).splineTo(new Vector2d(61,-12), Math.toRadians(0))
-                //shoot
+                .stopAndAdd(shoot.close_fire())
                 .setReversed(true).splineTo(new Vector2d(24, -40), Math.toRadians(180))
                 .setReversed(true).splineTo(new Vector2d(-24, -59), Math.toRadians(270))
                 //end here maybe if thats nessicary

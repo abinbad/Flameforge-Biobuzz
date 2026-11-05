@@ -136,7 +136,6 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * through any wiring.
          */
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40, 0, 0, 12.5));
 
         /*
