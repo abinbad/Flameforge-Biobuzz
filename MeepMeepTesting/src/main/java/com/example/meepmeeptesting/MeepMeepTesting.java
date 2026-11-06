@@ -23,9 +23,9 @@ public class MeepMeepTesting {
                 .build();
 
 
-         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(9, 0, Math.toRadians(0)))
-                 .splineTo(new Vector2d(39, 30), Math.PI / 2)
-                 .splineTo(new Vector2d(9, 60), Math.PI)
+         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                 .splineTo(new Vector2d(30, 30), Math.PI / 2)
+                 .splineTo(new Vector2d(0, 60), Math.PI)
                 .build()
          );
 
