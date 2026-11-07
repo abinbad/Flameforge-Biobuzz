@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MechanumDrive;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Mechanum Drive", group = "TeleOp")
+@Disabled
 public class TeleOp extends LinearOpMode {
 
     private MechanumDrive drive = new MechanumDrive();

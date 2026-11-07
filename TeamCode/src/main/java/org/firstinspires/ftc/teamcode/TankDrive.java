@@ -47,6 +47,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import org.firstinspires.ftc.teamcode.unused.Drawing;
 
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
@@ -93,8 +94,22 @@ public final class TankDrive {
         public double ramseteBBar = 2; // positive
 
         // turn controller gains
-        public double turnGain = 0.0;
-        public double turnVelGain = 0.0;
+        // sign-corrected in TurnAction below: error = target - actual, so positive gains are correct
+        public double turnGain = 2.0;
+        public double turnVelGain = 0.1;
+
+        // closed-loop finishing for turn() : keep correcting after the timed profile ends
+        public double turnTolDeg = 2.0;         // done when within this many degrees...
+        public double turnSettleTimeout = 2.0;  // ...or after this many seconds (0 = off, pure open loop)
+        public double turnMinPower = 0.25;      // motor power floor while still short of the target
+
+        // closed-loop finishing for splines / lines: correct the last few inches
+        public double endPosTolIn = 0.75;
+        public double endHeadTolDeg = 3.0;
+        public double endSettleTimeout = 1.0;   // seconds (0 = off)
+        public double endPosGain = 4.0;         // in/s of speed per inch of error
+        public double endHeadGain = 3.0;        // rad/s per rad of error
+        public double endMinPower = 0.15;
     }
 
     public static Params PARAMS = new Params();
@@ -278,6 +293,33 @@ public final class TankDrive {
         }
     }
 
+    private void setSidePowers(double left, double right) {
+        for (DcMotorEx m : leftMotors) m.setPower(left);
+        for (DcMotorEx m : rightMotors) m.setPower(right);
+    }
+
+    /** feedforward motor powers {left, right} for a robot-velocity command */
+    private double[] feedforwardPowers(PoseVelocity2dDual<Time> command) {
+        TankKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
+        double voltage = voltageSensor.getVoltage();
+        final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS,
+                PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);
+        double left = feedforward.compute(wheelVels.left) / voltage;
+        double right = feedforward.compute(wheelVels.right) / voltage;
+        tankCommandWriter.write(new TankCommandMessage(voltage, left, right));
+        return new double[]{left, right};
+    }
+
+    /** scale both powers (keeping their ratio) so the larger one is at least min */
+    private static double[] liftToMin(double[] pw, double min) {
+        double m = Math.max(Math.abs(pw[0]), Math.abs(pw[1]));
+        if (m > 0 && m < min) {
+            double k = min / m;
+            return new double[]{pw[0] * k, pw[1] * k};
+        }
+        return pw;
+    }
+
     public final class FollowTrajectoryAction implements Action {
         public final TimeTrajectory timeTrajectory;
         private double beginTs = -1;
@@ -310,13 +352,13 @@ public final class TankDrive {
             }
 
             if (t >= timeTrajectory.duration) {
-                for (DcMotorEx m : leftMotors) {
-                    m.setPower(0);
+                // the profile is over: keep correcting the last few inches instead of coasting past the end
+                if (PARAMS.endSettleTimeout > 0
+                        && t < timeTrajectory.duration + PARAMS.endSettleTimeout
+                        && settleToEnd(p)) {
+                    return true;
                 }
-                for (DcMotorEx m : rightMotors) {
-                    m.setPower(0);
-                }
-
+                setSidePowers(0, 0);
                 return false;
             }
 
@@ -372,6 +414,35 @@ public final class TankDrive {
             return true;
         }
 
+        /** returns true while it is still driving toward the end pose, false once close enough */
+        private boolean settleToEnd(TelemetryPacket p) {
+            Pose2d goal = timeTrajectory.path.get(timeTrajectory.path.length(), 1).value();
+            updatePoseEstimate();
+            Pose2d pose = localizer.getPose();
+
+            double dx = goal.position.x - pose.position.x;
+            double dy = goal.position.y - pose.position.y;
+            double h = pose.heading.toDouble();
+            double forwardErr = dx * Math.cos(h) + dy * Math.sin(h);   // + = still short of the end
+            double headErr = goal.heading.minus(pose.heading);          // target - actual
+
+            p.put("end forwardErr", forwardErr);
+            p.put("end headErr (deg)", Math.toDegrees(headErr));
+
+            if (Math.abs(forwardErr) < PARAMS.endPosTolIn
+                    && Math.abs(headErr) < Math.toRadians(PARAMS.endHeadTolDeg)) {
+                return false;
+            }
+
+            double v = Math.max(-12, Math.min(12, PARAMS.endPosGain * forwardErr));
+            double w = Math.max(-Math.PI, Math.min(Math.PI, PARAMS.endHeadGain * headErr));
+            PoseVelocity2dDual<Time> command =
+                    PoseVelocity2dDual.constant(new PoseVelocity2d(new Vector2d(v, 0), w), 3);
+            double[] pw = liftToMin(feedforwardPowers(command), PARAMS.endMinPower);
+            setSidePowers(pw[0], pw[1]);
+            return true;
+        }
+
         @Override
         public void preview(Canvas c) {
             c.setStroke("#4CAF507A");
@@ -399,45 +470,47 @@ public final class TankDrive {
                 t = Actions.now() - beginTs;
             }
 
-            if (t >= turn.duration) {
-                for (DcMotorEx m : leftMotors) {
-                    m.setPower(0);
-                }
-                for (DcMotorEx m : rightMotors) {
-                    m.setPower(0);
-                }
-
+            boolean settling = t >= turn.duration;
+            if (settling && (PARAMS.turnSettleTimeout <= 0
+                    || t >= turn.duration + PARAMS.turnSettleTimeout)) {
+                setSidePowers(0, 0);
                 return false;
             }
 
-            Pose2dDual<Time> txWorldTarget = turn.get(t);
+            Pose2dDual<Time> txWorldTarget = turn.get(Math.min(t, turn.duration));
             targetPoseWriter.write(new PoseMessage(txWorldTarget.value()));
 
             PoseVelocity2d robotVelRobot = updatePoseEstimate();
 
+            // target - actual (the original quickstart had this reversed, which made positive gains unstable)
+            double err = txWorldTarget.heading.value().minus(localizer.getPose().heading);
+            p.put("turn err (deg)", Math.toDegrees(err));
+
+            if (settling && Math.abs(err) < Math.toRadians(PARAMS.turnTolDeg)
+                    && Math.abs(robotVelRobot.angVel) < 0.6) {
+                setSidePowers(0, 0);
+                return false;
+            }
+
+            DualNum<Time> w;
+            if (!settling) {
+                w = txWorldTarget.heading.velocity().plus(
+                        PARAMS.turnGain * err
+                                + PARAMS.turnVelGain * (txWorldTarget.heading.velocity().value() - robotVelRobot.angVel));
+            } else {
+                double wSettle = Math.max(-PARAMS.maxAngVel, Math.min(PARAMS.maxAngVel, PARAMS.turnGain * err));
+                w = DualNum.<Time>constant(wSettle, 3);
+            }
+
             PoseVelocity2dDual<Time> command = new PoseVelocity2dDual<>(
-                    Vector2dDual.constant(new Vector2d(0, 0), 3),
-                    txWorldTarget.heading.velocity().plus(
-                            PARAMS.turnGain * localizer.getPose().heading.minus(txWorldTarget.heading.value()) +
-                            PARAMS.turnVelGain * (robotVelRobot.angVel - txWorldTarget.heading.velocity().value())
-                    )
-            );
+                    Vector2dDual.constant(new Vector2d(0, 0), 3), w);
             driveCommandWriter.write(new DriveCommandMessage(command));
 
-            TankKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
-            double voltage = voltageSensor.getVoltage();
-            final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS,
-                    PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);
-            double leftPower = feedforward.compute(wheelVels.left) / voltage;
-            double rightPower = feedforward.compute(wheelVels.right) / voltage;
-            tankCommandWriter.write(new TankCommandMessage(voltage, leftPower, rightPower));
-
-            for (DcMotorEx m : leftMotors) {
-                m.setPower(leftPower);
+            double[] pw = feedforwardPowers(command);
+            if (Math.abs(err) > Math.toRadians(PARAMS.turnTolDeg)) {
+                pw = liftToMin(pw, PARAMS.turnMinPower);
             }
-            for (DcMotorEx m : rightMotors) {
-                m.setPower(rightPower);
-            }
+            setSidePowers(pw[0], pw[1]);
 
             Canvas c = p.fieldOverlay();
             drawPoseHistory(c);

@@ -23,9 +23,16 @@ public class MeepMeepTesting {
                 .build();
 
 
-         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                 .splineTo(new Vector2d(30, 30), Math.PI / 2)
-                 .splineTo(new Vector2d(0, 60), Math.PI)
+         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(61 , -12, Math.toRadians(0)))
+                 .lineToX(42)
+                 .turnTo(Math.toRadians(270))
+                 .splineTo(new Vector2d(36, -51), Math.toRadians(270))
+                 .splineTo(new Vector2d(59.5, -61), Math.toRadians(0))
+                 .setReversed(true).splineTo(new Vector2d(36, -51), Math.toRadians(180))
+                 .setReversed(false).splineTo(new Vector2d(61,-12), Math.toRadians(0))
+                 .setReversed(true).splineTo(new Vector2d(24, -40), Math.toRadians(180))
+                 .setReversed(true).splineTo(new Vector2d(-24, -59), Math.toRadians(270))
+                 //end here maybe if thats nessicary
                 .build()
          );
 
@@ -34,10 +41,10 @@ public class MeepMeepTesting {
                  .setColorScheme(new ColorSchemeRedLight())
                  .build();
 
-        bot2.runAction(bot2.getDrive().actionBuilder(new Pose2d(0, 0, 0))
-                //.lineToX(61)
-                .build()
-        );
+//        bot2.runAction(bot2.getDrive().actionBuilder(new Pose2d(0, 0, 0))
+//                //.lineToX(61)
+//                .build()
+//        );
 
         Image img;
         try (InputStream in = MeepMeepTesting.class.getResourceAsStream("/Juice-BIOBUZZ-Dark.png")) {
@@ -54,7 +61,7 @@ public class MeepMeepTesting {
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(myBot)
-                .addEntity(bot2)
+//                .addEntity(bot2)
                 .start();
     }
 }

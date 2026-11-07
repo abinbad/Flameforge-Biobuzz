@@ -72,8 +72,8 @@ public class BioBuzzStarterBotTeleop extends OpMode {
      * in the launch() function to only run the windmill servo when the motor is spinning fast
      * enough to make a successful throw.
      */
-    public final int CLOSE_TARGET_VELOCITY = 1250;
-    public final int CLOSE_MIN_VELOCITY = 1200;
+    public final int CLOSE_TARGET_VELOCITY = 1275;
+    public final int CLOSE_MIN_VELOCITY = 1225;
 
     public final int FAR_TARGET_VELOCITY = 1300;
     public final int FAR_MIN_VELOCITY = 1250;
@@ -136,7 +136,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * through any wiring.
          */
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40, 0, 0, 12.5));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(105, 0, 0, 12.4));
 
         /*
          * set Feeders to an initial value to initialize the servo controller

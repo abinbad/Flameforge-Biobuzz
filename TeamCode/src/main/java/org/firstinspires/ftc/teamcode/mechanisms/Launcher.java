@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.mechanisms;
 
 import androidx.annotation.NonNull;
 
@@ -18,8 +18,8 @@ public class Launcher extends InterruptedException {
     private final DcMotorEx launcher;
     private final CRServo windmill;
 
-    public static double CLOSE_TARGET_VELOCITY = 1250;
-    public static double CLOSE_MINIMUM_VELOCITY = 1200;
+    public static double CLOSE_TARGET_VELOCITY = 1275;
+    public static double CLOSE_MINIMUM_VELOCITY = 1225;
     public static double WINDMILL_POWER = 1;
     public static double feedTime = 5;
     public static double spinUpTimeout = 3;
@@ -31,7 +31,7 @@ public class Launcher extends InterruptedException {
         launcher.setDirection(DcMotorSimple.Direction.FORWARD);
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40, 0, 0, 12.5));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(105, 0, 0, 12.4));
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
@@ -81,7 +81,8 @@ public class Launcher extends InterruptedException {
                 spinUpAndWait(CLOSE_TARGET_VELOCITY, CLOSE_MINIMUM_VELOCITY),
                 new InstantAction(() -> windmill.setPower(WINDMILL_POWER)),
                 new SleepAction(feedTime),
-                stopAll()
+                stopAll(),
+                new SleepAction(1.5)
         );
     }
 }

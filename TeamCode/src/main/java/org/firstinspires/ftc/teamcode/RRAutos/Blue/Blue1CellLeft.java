@@ -7,8 +7,9 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Intake;
-import org.firstinspires.ftc.teamcode.Launcher;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
+import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Autonomous (name = "RoadRunner Starter Bot Auto")
@@ -17,7 +18,7 @@ public class Blue1CellLeft extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d beginPose = new Pose2d(-61, 12, 180);
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(-61, 12, Math.toRadians(180)));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         

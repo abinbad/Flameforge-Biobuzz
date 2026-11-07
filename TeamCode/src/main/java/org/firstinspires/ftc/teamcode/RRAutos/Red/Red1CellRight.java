@@ -1,19 +1,16 @@
 package org.firstinspires.ftc.teamcode.RRAutos.Red;
 
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Intake;
-import org.firstinspires.ftc.teamcode.Launcher;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
+import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Autonomous (name = "RoadRunner Starter Bot Auto")
@@ -23,7 +20,7 @@ public class Red1CellRight extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
 
-        Pose2d beginPose = new Pose2d(61, -12, 0);
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, 0));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         
