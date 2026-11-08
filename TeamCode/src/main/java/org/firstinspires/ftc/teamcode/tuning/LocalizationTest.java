@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.unused.Drawing;
 import org.firstinspires.ftc.teamcode.unused.MecanumDrive;
-import org.firstinspires.ftc.teamcode.TankDrive;
 
 @Disabled
 public class LocalizationTest extends LinearOpMode {

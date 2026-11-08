@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
-import org.firstinspires.ftc.teamcode.RobotGeometry;
-import org.firstinspires.ftc.teamcode.TankDrive;
+import org.firstinspires.ftc.teamcode.tuning.RobotGeometry;
+import org.firstinspires.ftc.teamcode.tuning.TankDrive;
 
 @Autonomous (name = "Red: 1 Hive Tip")
 public class Red1Tip extends LinearOpMode {
