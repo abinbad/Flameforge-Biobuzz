@@ -14,14 +14,14 @@ import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
-@Autonomous (name = "Auto")
+@Autonomous (name = "Red: 1 Hive Tip")
 public class Red1Tip extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
 
-        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, 0));
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, Math.toRadians(0)));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         

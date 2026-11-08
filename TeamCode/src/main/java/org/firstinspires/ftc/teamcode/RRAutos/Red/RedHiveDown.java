@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
-@Autonomous (name = "Auto")
+@Autonomous (name = "Red: Hive Down Park")
 public class RedHiveDown extends LinearOpMode {
 
     @Override
@@ -23,14 +23,10 @@ public class RedHiveDown extends LinearOpMode {
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         
-        Launcher shoot = new Launcher(hardwareMap);
-        Intake intake = new Intake(hardwareMap);
-
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                .setReversed(true).splineTo(new Vector2d(-24, -59), Math.toRadians(270))
-                //end here maybe if thats nessicary
+                .setReversed(true).splineTo(new Vector2d(-48, -59), Math.toRadians(270))
                 .build();
 
         Actions.runBlocking(new SequentialAction(path));

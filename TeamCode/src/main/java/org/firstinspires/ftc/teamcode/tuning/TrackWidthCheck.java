@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.TankDrive;
  *
  * Change ANGLE_DEG / CLOSED_LOOP in FTC Dashboard before pressing play.
  */
+@Disabled
 @Config
 @Autonomous(name = "TrackWidthCheck", group = "tuning")
 public class TrackWidthCheck extends LinearOpMode {
