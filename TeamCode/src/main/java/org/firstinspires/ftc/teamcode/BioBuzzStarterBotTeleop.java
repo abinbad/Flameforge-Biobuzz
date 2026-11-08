@@ -75,8 +75,8 @@ public class BioBuzzStarterBotTeleop extends OpMode {
     public final int CLOSE_TARGET_VELOCITY = 1250;
     public final int CLOSE_MIN_VELOCITY = 1200;
 
-    public final int FAR_TARGET_VELOCITY = 1300;
-    public final int FAR_MIN_VELOCITY = 1250;
+    public final int FAR_TARGET_VELOCITY = 1275;
+    public final int FAR_MIN_VELOCITY = 1225;
 
     /*
      * These two variables store the power we need to apply to the motors. In other cases, we may
@@ -126,6 +126,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
         leftDrive.setZeroPowerBehavior(BRAKE);
         rightDrive.setZeroPowerBehavior(BRAKE);
         intake.setZeroPowerBehavior(BRAKE);
+        launcher.setZeroPowerBehavior(BRAKE);
 
         /*
          * Here we set our launcher to the RUN_USING_ENCODER runmode.
@@ -135,8 +136,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * through any wiring.
          */
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40, 0, 0, 12.5));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(105, 0, 0, 12.4));
 
         /*
          * set Feeders to an initial value to initialize the servo controller
