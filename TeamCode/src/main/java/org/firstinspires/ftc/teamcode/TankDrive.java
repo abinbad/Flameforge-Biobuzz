@@ -81,35 +81,43 @@ public final class TankDrive {
         public double kA = 0.0000255;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 30;
-        public double minProfileAccel = -30;
+        public double maxWheelVel = 45;
+        public double minProfileAccel = -20;
         public double maxProfileAccel = 50;
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.PI; // shared with path
-        public double maxAngAccel = Math.PI;
+        public double maxAngVel = 1.5*Math.PI; // shared with path
+        public double maxAngAccel = 1.5*Math.PI;
 
         // path controller gains
-        public double ramseteZeta = 0.7; // in the range (0, 1)
-        public double ramseteBBar = 2; // positive
+        public double ramseteZeta = 0.8; // in the range (0, 1)
+        public double ramseteBBar = 4; // positive
 
         // turn controller gains
         // sign-corrected in TurnAction below: error = target - actual, so positive gains are correct
         public double turnGain = 2.0;
         public double turnVelGain = 0.1;
 
+        // extra voltage that makes the outer wheel push harder / inner wheel less whenever the robot
+        // is rotating (skid-steer scrub). 0 = off. Tune with TrackWidthCheck until it reads ~360.
+        public double kTurn = 3.5;
+
         // closed-loop finishing for turn() : keep correcting after the timed profile ends
-        public double turnTolDeg = 2.0;         // done when within this many degrees...
-        public double turnSettleTimeout = 2.0;  // ...or after this many seconds (0 = off, pure open loop)
+        public double turnTolDeg = 1.0;         // done when within this many degrees...
+        public double turnSettleTimeout = 2.0; // ...or after this many seconds (0 = off, pure open loop)
         public double turnMinPower = 0.25;      // motor power floor while still short of the target
 
         // closed-loop finishing for splines / lines: correct the last few inches
-        public double endPosTolIn = 0.75;
+        public double endPosTolIn = .75;
         public double endHeadTolDeg = 3.0;
-        public double endSettleTimeout = 1.0;   // seconds (0 = off)
+        public double endSettleTimeout = 1.5;   // seconds (0 = off)
         public double endPosGain = 4.0;         // in/s of speed per inch of error
         public double endHeadGain = 3.0;        // rad/s per rad of error
         public double endMinPower = 0.15;
+
+        public double kTurnSpin = 0.0;            // volts, used only by turn()
+        public double turnSettleMaxAngVel = 1.5;  // rad/s cap while finishing a turn
+
     }
 
     public static Params PARAMS = new Params();
@@ -209,7 +217,7 @@ public final class TankDrive {
             meanRightVel /= rightEncs.size();
 
             FlightRecorder.write("TANK_LOCALIZER_INPUTS",
-                     new TankLocalizerInputsMessage(leftReadings, rightReadings));
+                    new TankLocalizerInputsMessage(leftReadings, rightReadings));
 
             if (!initialized) {
                 initialized = true;
@@ -300,12 +308,18 @@ public final class TankDrive {
 
     /** feedforward motor powers {left, right} for a robot-velocity command */
     private double[] feedforwardPowers(PoseVelocity2dDual<Time> command) {
+        return feedforwardPowers(command, PARAMS.kTurn);
+    }
+
+    private double[] feedforwardPowers(PoseVelocity2dDual<Time> command, double kTurn) {
         TankKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
         double voltage = voltageSensor.getVoltage();
         final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS,
                 PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);
-        double left = feedforward.compute(wheelVels.left) / voltage;
-        double right = feedforward.compute(wheelVels.right) / voltage;
+        double omega = command.angVel.value();
+        double dv = kTurn * Math.tanh(omega / 0.5);
+        double left = (feedforward.compute(wheelVels.left) - dv) / voltage;
+        double right = (feedforward.compute(wheelVels.right) + dv) / voltage;
         tankCommandWriter.write(new TankCommandMessage(voltage, left, right));
         return new double[]{left, right};
     }
@@ -373,13 +387,10 @@ public final class TankDrive {
                     .compute(x, txWorldTarget, localizer.getPose());
             driveCommandWriter.write(new DriveCommandMessage(command));
 
-            TankKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
-            double voltage = voltageSensor.getVoltage();
-            final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS,
-                    PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);
-            double leftPower = feedforward.compute(wheelVels.left) / voltage;
-            double rightPower = feedforward.compute(wheelVels.right) / voltage;
-            tankCommandWriter.write(new TankCommandMessage(voltage, leftPower, rightPower));
+            // shared feedforward (includes kTurn)
+            double[] pw = feedforwardPowers(command);
+            double leftPower = pw[0];
+            double rightPower = pw[1];
 
             for (DcMotorEx m : leftMotors) {
                 m.setPower(leftPower);
@@ -438,7 +449,8 @@ public final class TankDrive {
             double w = Math.max(-Math.PI, Math.min(Math.PI, PARAMS.endHeadGain * headErr));
             PoseVelocity2dDual<Time> command =
                     PoseVelocity2dDual.constant(new PoseVelocity2d(new Vector2d(v, 0), w), 3);
-            double[] pw = liftToMin(feedforwardPowers(command), PARAMS.endMinPower);
+            double floor = Math.abs(forwardErr) < PARAMS.endPosTolIn ? PARAMS.turnMinPower : PARAMS.endMinPower;
+            double[] pw = liftToMin(feedforwardPowers(command), floor);
             setSidePowers(pw[0], pw[1]);
             return true;
         }

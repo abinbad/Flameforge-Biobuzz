@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RRAutos.Red;
+package org.firstinspires.ftc.teamcode.RRAutos;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -8,30 +8,28 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
-@Autonomous (name = "RoadRunner Starter Bot Auto")
-public class RedParkLeft extends LinearOpMode {
+
+@Autonomous (name = "Auto")
+public class Turn extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, 0));
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(0, 0, Math.toRadians(0)));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
-        
-        Launcher shoot = new Launcher(hardwareMap);
-        Intake intake = new Intake(hardwareMap);
 
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                .setReversed(true).splineTo(new Vector2d(0, -48), Math.toRadians(180))
-                .setReversed(true).splineTo(new Vector2d(-48, -59), Math.toRadians(270))
-                //end here maybe if thats nessicary
+                .turn(Math.toRadians(90))
+                .waitSeconds(2)
+                .turn(Math.toRadians(150))
+                .waitSeconds(2)
+                .turn(Math.toRadians(330))
                 .build();
 
         Actions.runBlocking(new SequentialAction(path));

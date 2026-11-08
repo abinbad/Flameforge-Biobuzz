@@ -18,8 +18,11 @@ public class Launcher extends InterruptedException {
     private final DcMotorEx launcher;
     private final CRServo windmill;
 
-    public static double CLOSE_TARGET_VELOCITY = 1275;
-    public static double CLOSE_MINIMUM_VELOCITY = 1225;
+    public static double CLOSE_TARGET_VELOCITY = 1250;
+    public static double CLOSE_MINIMUM_VELOCITY = 1200;
+
+    public static double SOFT_TARGET_VELOCITY = 1225;
+    public static double SOFT_MINIMUM_VELOCITY = 1075;
     public static double WINDMILL_POWER = 1;
     public static double feedTime = 5;
     public static double spinUpTimeout = 3;
@@ -79,6 +82,16 @@ public class Launcher extends InterruptedException {
     public Action close_fire() {
         return new SequentialAction(
                 spinUpAndWait(CLOSE_TARGET_VELOCITY, CLOSE_MINIMUM_VELOCITY),
+                new InstantAction(() -> windmill.setPower(WINDMILL_POWER)),
+                new SleepAction(feedTime),
+                stopAll(),
+                new SleepAction(1.5)
+        );
+    }
+
+    public Action soft_fire() {
+        return new SequentialAction(
+                spinUpAndWait(SOFT_TARGET_VELOCITY, SOFT_MINIMUM_VELOCITY),
                 new InstantAction(() -> windmill.setPower(WINDMILL_POWER)),
                 new SleepAction(feedTime),
                 stopAll(),

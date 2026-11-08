@@ -28,7 +28,7 @@ public class Intake extends InterruptedException {
 
     public void stop() {
         intake.setPower(0);
-        intake.setPower(0);
+        rightIntakeServo.setPower(0);
         leftIntakeServo.setPower(0);
     }
 

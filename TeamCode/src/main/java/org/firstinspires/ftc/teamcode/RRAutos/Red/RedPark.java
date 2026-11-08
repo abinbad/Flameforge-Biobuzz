@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RRAutos.Blue;
+package org.firstinspires.ftc.teamcode.RRAutos.Red;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -13,13 +13,13 @@ import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
-@Autonomous (name = "RoadRunner Starter Bot Auto")
-public class BlueHiveDownLeft extends LinearOpMode {
+@Autonomous (name = "Auto")
+public class RedPark extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, 11, 0));
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, 0));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         
@@ -29,8 +29,9 @@ public class BlueHiveDownLeft extends LinearOpMode {
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                .setReversed(true).splineTo(new Vector2d(48, 59), Math.toRadians(90))
-                 //end here maybe if thats nessicary
+                .setReversed(true).splineTo(new Vector2d(0, -48), Math.toRadians(180))
+                .setReversed(true).splineTo(new Vector2d(-24, -59), Math.toRadians(270))
+                //end here maybe if thats nessicary
                 .build();
 
         Actions.runBlocking(new SequentialAction(path));

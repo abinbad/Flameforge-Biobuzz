@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -11,14 +12,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 /**
- * Commands ONE full turn (360 deg) with all feedback turned off, and measures how far the robot
- * really turned by adding up the IMU yaw during the whole turn (so a 90 deg turn reads as 90,
- * not as a small error). Also adds up the odopod heading so you can compare the two.
+ * Turns the robot by ANGLE_DEG and reports how far it REALLY turned (IMU, summed over the whole
+ * move) next to what the odopods think.
  *
- * Restore trackWidthTicks to your known-good value before running this.
+ *  CLOSED_LOOP = false : pure feedforward (gains 0, no settle phase). Tests the model only.
+ *  CLOSED_LOOP = true  : exactly what turn() does in an auto.
+ *
+ * Change ANGLE_DEG / CLOSED_LOOP in FTC Dashboard before pressing play.
  */
+@Config
 @Autonomous(name = "TrackWidthCheck", group = "tuning")
 public class TrackWidthCheck extends LinearOpMode {
+    public static double ANGLE_DEG = 90;
+    public static boolean CLOSED_LOOP = false;
+
     private static double imuYaw(TankDrive d) {
         return d.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
@@ -32,13 +39,16 @@ public class TrackWidthCheck extends LinearOpMode {
         double imuTotal = 0, locTotal = 0;
 
         waitForStart();
+        final double angleDeg = ANGLE_DEG;
+        final boolean closed = CLOSED_LOOP;
         try {
-            // pure open loop: no gains, no settle phase
-            TankDrive.PARAMS.turnGain = 0;
-            TankDrive.PARAMS.turnVelGain = 0;
-            TankDrive.PARAMS.turnSettleTimeout = 0;
+            if (!closed) {
+                TankDrive.PARAMS.turnGain = 0;
+                TankDrive.PARAMS.turnVelGain = 0;
+                TankDrive.PARAMS.turnSettleTimeout = 0;
+            }
 
-            Action turn = drive.actionBuilder(new Pose2d(0, 0, 0)).turn(2 * Math.PI).build();
+            Action turn = drive.actionBuilder(new Pose2d(0, 0, 0)).turn(Math.toRadians(angleDeg)).build();
             TelemetryPacket packet = new TelemetryPacket();
 
             drive.updatePoseEstimate();
@@ -71,21 +81,12 @@ public class TrackWidthCheck extends LinearOpMode {
         double locDeg = Math.toDegrees(locTotal);
 
         while (opModeIsActive()) {
-            telemetry.addData("Commanded", "360 deg");
-            telemetry.addData("IMU says the robot turned", "%.1f deg", imuDeg);
+            telemetry.addData("Mode", closed ? "closed loop (like an auto)" : "feedforward only");
+            telemetry.addData("Commanded", "%.0f deg", angleDeg);
+            telemetry.addData("IMU says it turned", "%.1f deg", imuDeg);
             telemetry.addData("Odopods say it turned", "%.1f deg", locDeg);
             if (Math.abs(imuDeg - locDeg) > 5) {
-                telemetry.addLine("Odopod heading disagrees with the IMU -> re-run the angular ramp");
-            }
-            if (Math.abs(imuDeg) > 10) {
-                double ratio = 360.0 / imuDeg;
-                telemetry.addData("trackWidthTicks (now) -> (suggested)", "%.0f -> %.0f",
-                        TankDrive.PARAMS.trackWidthTicks, TankDrive.PARAMS.trackWidthTicks * ratio);
-                if (ratio < 0.7 || ratio > 1.5) {
-                    telemetry.addLine("Suggestion is far from your real track width: that's friction,");
-                    telemetry.addLine("not geometry. Leave trackWidthTicks alone and rely on the");
-                    telemetry.addLine("closed-loop turn settings (turnMinPower, turnSettleTimeout).");
-                }
+                telemetry.addLine("Odopods disagree with the IMU -> re-run the angular ramp");
             }
             telemetry.update();
         }
