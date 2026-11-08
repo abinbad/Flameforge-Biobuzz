@@ -21,7 +21,7 @@ public class Red1Tip extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
 
-        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, 0));
+        Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(61, -12, Math.toRadians(0)));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
         

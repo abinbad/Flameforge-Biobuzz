@@ -85,7 +85,7 @@ public class Launcher extends InterruptedException {
                 new InstantAction(() -> windmill.setPower(WINDMILL_POWER)),
                 new SleepAction(feedTime),
                 stopAll(),
-                new SleepAction(1.5)
+                new SleepAction(.75)
         );
     }
 
@@ -95,7 +95,7 @@ public class Launcher extends InterruptedException {
                 new InstantAction(() -> windmill.setPower(WINDMILL_POWER)),
                 new SleepAction(feedTime),
                 stopAll(),
-                new SleepAction(1.5)
+                new SleepAction(.75)
         );
     }
 }
