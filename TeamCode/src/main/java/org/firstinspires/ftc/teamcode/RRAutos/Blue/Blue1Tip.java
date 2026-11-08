@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.TankDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 
-@Autonomous (name = "Blue: 1 Hive Tip")
+@Autonomous (name = "Auto")
 public class Blue1Tip extends LinearOpMode {
 
     @Override
@@ -24,7 +24,7 @@ public class Blue1Tip extends LinearOpMode {
         Pose2d beginPose = RobotGeometry.pivotFromCenter(new Pose2d(-61, 12, Math.toRadians(180)));
 
         TankDrive drive = new TankDrive(hardwareMap, beginPose);
-
+        
         Launcher shoot = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
 

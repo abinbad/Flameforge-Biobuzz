@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 
-@Autonomous (name = "Blue: Simple Park")
+@Autonomous (name = "Auto")
 public class BluePark extends LinearOpMode {
 
     @Override

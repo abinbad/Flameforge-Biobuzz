@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.RobotGeometry;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
-@Autonomous (name = "Blue: Hive Down Park")
+@Autonomous (name = "Auto")
 public class BlueHiveDown extends LinearOpMode {
 
     @Override

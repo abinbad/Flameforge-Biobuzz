@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.TankDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 
-@Autonomous (name = "Red: 2 Hive Tips")
+@Autonomous (name = "Auto")
 public class Red2Tip extends LinearOpMode {
 
     @Override
